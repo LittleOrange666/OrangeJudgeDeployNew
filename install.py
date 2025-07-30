@@ -157,14 +157,14 @@ def main():
                     return
             l.append(k + "=" + v)
 
-        judge_token = secrets.token_urlsafe(33)
+        judge_token = secrets.token_hex(33)
         upd("judge_server", "JUDGE_TOKEN", judge_token)
         upd("judge_backend", "JUDGE_TOKEN", judge_token)
-        db_password = secrets.token_urlsafe(21)
+        db_password = secrets.token_hex(21)
         upd("judge_mariadb", "MYSQL_PASSWORD", db_password)
-        upd("judge_mariadb", "MYSQL_ROOT_PASSWORD", secrets.token_urlsafe(21))
+        upd("judge_mariadb", "MYSQL_ROOT_PASSWORD", secrets.token_hex(21))
         upd("judge_backend", "MYSQL_PASSWORD", db_password)
-        flask_secret_key = secrets.token_urlsafe(21)
+        flask_secret_key = secrets.token_hex(21)
         upd("judge_backend", "FLASK_SECRET_KEY", flask_secret_key)
         with open("docker-compose.yml", "w", encoding="utf8") as f:
             yaml.dump(info, f)
