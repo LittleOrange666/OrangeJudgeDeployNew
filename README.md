@@ -11,3 +11,5 @@ install.py會把docker-compose.yml和OrangeJudgeLangs的資料夾下載到當前
 或是呼叫OrangeJudgeLangs中的腳本來安裝語言
 
 最後可以直接開啟伺服器
+
+update.py會更新docker-compose.yml來更新OrangeJudge的版本。
