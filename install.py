@@ -11,15 +11,17 @@ import webbrowser
 
 import yaml
 
+frontend_name = "judge_frontend"
+
 cloudflared_template = {
     "image": "cloudflare/cloudflared:latest",
     "restart": "unless-stopped",
-    "command": "tunnel --url http://judge_backend:8080 --no-autoupdate run",
+    "command": f"tunnel --url http://{frontend_name}:80 --no-autoupdate run",
     "environment": [
         "TUNNEL_TOKEN="
     ],
     "depends_on": {
-        "judge_backend": {
+        frontend_name: {
             "condition": "service_healthy"
         }
     }
@@ -103,16 +105,16 @@ def security_tools():
                 print("docker-compose.yml not found.")
                 break
             for service in info["services"]:
-                if "judge_backend" != service and "ports" in info["services"][service]:
+                if frontend_name != service and "ports" in info["services"][service]:
                     del info["services"][service]["ports"]
-            print("Removed exposed ports from all services except judge_backend")
+            print(f"Removed exposed ports from all services except {frontend_name}")
         elif choice == "3":
             token = input("Enter your cloudflare tunnel token: ")
             template = copy.deepcopy(cloudflared_template)
             template["environment"][0] = f"TUNNEL_TOKEN={token}"
             info["services"]["cloudflare"] = template
-            if "ports" in info["services"]["judge_backend"]:
-                del info["services"]["judge_backend"]["ports"]
+            if "ports" in info["services"][frontend_name]:
+                del info["services"][frontend_name]["ports"]
             print("Added cloudflare proxy service to docker-compose.yml")
         elif choice == "4":
             token = get_tunnel_token()
@@ -122,8 +124,8 @@ def security_tools():
             template = copy.deepcopy(cloudflared_template)
             template["environment"][0] = f"TUNNEL_TOKEN={token}"
             info["services"]["cloudflare"] = template
-            if "ports" in info["services"]["judge_backend"]:
-                del info["services"]["judge_backend"]["ports"]
+            if "ports" in info["services"][frontend_name]:
+                del info["services"][frontend_name]["ports"]
             print("Added cloudflare proxy service to docker-compose.yml")
         else:
             print("Invalid choice, please try again")
@@ -135,7 +137,7 @@ def security_tools():
 
 def main():
     if not os.path.exists("docker-compose.yml"):
-        dc_url = "https://raw.githubusercontent.com/LittleOrange666/OrangeJudge/refs/heads/main/docker-compose.yml"
+        dc_url = "https://raw.githubusercontent.com/LittleOrange666/OrangeJudgeFrontend/refs/heads/main/docker-compose.yml"
         try:
             with urllib.request.urlopen(dc_url) as response:
                 if response.status != 200:

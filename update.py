@@ -22,28 +22,32 @@ def main():
     username = "littleorange666"
     image_name1 = "orange_judge"
     image_name2 = "judge_server"
+    image_name3 = "judge_frontend"
     version1 = query(username, image_name1)
     version2 = query(username, image_name2)
+    version3 = query(username, image_name3)
     with open("docker-compose.yml", encoding="utf8") as f:
         info = yaml.load(f, Loader=yaml.FullLoader)
     cur_version1 = info["services"]["judge_backend"]["image"].split(":")[-1]
     cur_version2 = info["services"]["judge_server"]["image"].split(":")[-1]
+    cur_version3 = info["services"]["judge_frontend"]["image"].split(":")[-1]
     print("For judge_backend, current version is", cur_version1, "and latest version is", version1)
     print("For judge_server, current version is", cur_version2, "and latest version is", version2)
-    if cur_version1 == version1 and cur_version2 == version2:
+    print("For judge_frontend, current version is", cur_version3, "and latest version is", version3)
+    if cur_version1 == version1 and cur_version2 == version2 and cur_version3 == version3:
         print("You are using the latest version.")
         return
     print("You are not using the latest version, updating...")
     info["services"]["judge_backend"]["image"] = f"{username}/{image_name1}:{version1}"
     info["services"]["judge_server"]["image"] = f"{username}/{image_name2}:{version2}"
-    environments = {o.split("=")[0]:o.split("=")[1] for o in info["services"]["judge_backend"]["environment"]}
+    info["services"]["judge_frontend"]["image"] = f"{username}/{image_name3}:{version3}"
+    environments = {o.split("=")[0]: o.split("=")[1] for o in info["services"]["judge_backend"]["environment"]}
     environments["ORANGEJUDGE_VERSION"] = version1
     info["services"]["judge_backend"]["environment"] = [f"{k}={v}" for k, v in environments.items()]
     with open("docker-compose.yml", "w", encoding="utf8") as f:
         yaml.dump(info, f)
     print("Updated docker-compose.yml with the latest version.")
     os.system("docker compose up -d")
-
 
 
 if __name__ == "__main__":
